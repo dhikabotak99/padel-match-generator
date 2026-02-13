@@ -27,16 +27,18 @@ class GameLogicService
         //     // Let's implement a bye system later. For now, strict 4s.
         // }
 
+        $courts = $match->courts;
+
         if ($match->type === 'americano') {
-            $this->generateAmericanoGames($round, $players);
+            $this->generateAmericanoGames($round, $players, $courts);
         } elseif ($match->type === 'mexicano') {
-            $this->generateMexicanoGames($round, $players);
+            $this->generateMexicanoGames($round, $players, $courts);
         }
 
         return $round;
     }
 
-    protected function generateAmericanoGames(Round $round, $players)
+    protected function generateAmericanoGames(Round $round, $players, $courts)
     {
         // Simple random mix for MVP, trying to avoid repeat partners if possible
         // Ideally: Round Robin logic.
@@ -45,6 +47,7 @@ class GameLogicService
         
         $shuffled = $players->shuffle();
         $chunks = $shuffled->chunk(4);
+        $courtIndex = 0;
 
         foreach ($chunks as $chunk) {
             if ($chunk->count() < 4) continue; // Skip if not enough for a game (sit out)
@@ -53,8 +56,12 @@ class GameLogicService
             // Create game: (0,1) vs (2,3) - Simplest approach
             // TODO: Improve to track history and optimize pairings
             
+            $court = $courts->count() > 0 ? $courts[$courtIndex % $courts->count()] : null;
+            $courtIndex++;
+
             Game::create([
                 'round_id' => $round->id,
+                'court_id' => $court ? $court->id : null,
                 'team_a_player_1_id' => $p[0]->id,
                 'team_a_player_2_id' => $p[1]->id,
                 'team_b_player_1_id' => $p[2]->id,
@@ -63,7 +70,7 @@ class GameLogicService
         }
     }
 
-    protected function generateMexicanoGames(Round $round, $players)
+    protected function generateMexicanoGames(Round $round, $players, $courts)
     {
         // Mexicano: Sort by score, then 1&4 vs 2&3
         // Calculate scores
@@ -89,6 +96,7 @@ class GameLogicService
         }
 
         $chunks = $sortedPlayers->chunk(4);
+        $courtIndex = 0;
 
         foreach ($chunks as $chunk) {
              if ($chunk->count() < 4) continue;
@@ -97,8 +105,12 @@ class GameLogicService
              // Mexicano pairing: (1, 4) vs (2, 3)
              // Indices: 0, 3 vs 1, 2
              
+             $court = $courts->count() > 0 ? $courts[$courtIndex % $courts->count()] : null;
+             $courtIndex++;
+
             Game::create([
                 'round_id' => $round->id,
+                'court_id' => $court ? $court->id : null,
                 'team_a_player_1_id' => $p[0]->id,
                 'team_a_player_2_id' => $p[3]->id,
                 'team_b_player_1_id' => $p[1]->id,

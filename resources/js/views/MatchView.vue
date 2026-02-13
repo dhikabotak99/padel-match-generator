@@ -11,7 +11,7 @@
            <p class="text-sage-500 font-medium">Round <span class="text-sage-700 font-bold">{{ currentRoundNumber }}</span> in progress</p>
         </div>
         <div class="relative z-10 w-full sm:w-auto">
-            <button @click="nextRound" :disabled="isLoading" class="w-full sm:w-auto bg-sage-600 hover:bg-sage-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button @click="nextRound" :disabled="isLoading" class="w-full sm:w-auto bg-sage-600 hover:bg-sage-700 text-gray-800 font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed">
             {{ isLoading ? 'Generating...' : 'Next Round' }}
             </button>
         </div>
@@ -49,41 +49,49 @@
                   <span class="text-sm text-sage-500 italic">Enter scores to auto-save</span>
               </div>
               
-              <div class="grid gap-4 md:gap-6">
-                  <div v-for="game in currentRound.games" :key="game.id" class="bg-sage-50 rounded-2xl p-4 md:p-6 border border-sage-100 hover:border-sage-200 transition shadow-sm hover:shadow-md">
-                      <div class="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
-                          <!-- Team A -->
-                          <div class="flex-1 flex flex-col items-center md:items-start text-center md:text-left space-y-1">
-                              <div class="font-bold text-sage-900 text-base md:text-lg">{{ game.team_a_player_1.name }}</div>
-                              <div class="font-bold text-sage-900 text-base md:text-lg">{{ game.team_a_player_2.name }}</div>
-                          </div>
+              <div v-for="(games, courtId) in gamesByCourt" :key="courtId" class="mb-8">
+                <h4 class="text-lg font-bold text-sage-700 mb-3 flex items-center">
+                    <span class="bg-sage-200 text-sage-800 py-1 px-3 rounded-lg mr-2">
+                        {{ getCourtName(courtId) }}
+                    </span>
+                    <span class="text-sm font-normal text-sage-500">{{ games.length }} Game(s)</span>
+                </h4>
+                <div class="grid gap-4 md:gap-6"> 
+                    <div v-for="game in games" :key="game.id" class="bg-sage-50 rounded-2xl p-4 md:p-6 border border-sage-100 hover:border-sage-200 transition shadow-sm hover:shadow-md">
+                        <div class="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+                            <!-- Team A -->
+                            <div class="flex-1 flex flex-col items-center md:items-start text-center md:text-left space-y-1">
+                                <div class="font-bold text-sage-900 text-base md:text-lg">{{ game.team_a_player1.name }}</div>
+                                <div class="font-bold text-sage-900 text-base md:text-lg">{{ game.team_a_player2.name }}</div>
+                            </div>
 
-                          <!-- Score Input -->
-                          <div class="flex items-center space-x-4 bg-white px-4 py-2 md:px-6 md:py-3 rounded-xl shadow-inner border border-sage-100">
-                              <input 
-                              v-model.number="game.score_team_a" 
-                              @change="updateScore(game)"
-                              type="number" 
-                              class="w-12 md:w-16 text-center border-none bg-transparent text-2xl md:text-3xl font-black text-sage-800 focus:ring-0 p-0"
-                              placeholder="0"
-                              >
-                              <span class="text-sage-300 font-light text-xl md:text-2xl">/</span>
-                              <input 
-                              v-model.number="game.score_team_b" 
-                              @change="updateScore(game)"
-                              type="number" 
-                              class="w-12 md:w-16 text-center border-none bg-transparent text-2xl md:text-3xl font-black text-sage-800 focus:ring-0 p-0"
-                              placeholder="0"
-                              >
-                          </div>
+                            <!-- Score Input -->
+                            <div class="flex items-center space-x-4 bg-white px-4 py-2 md:px-6 md:py-3 rounded-xl shadow-inner border border-sage-100">
+                                <input 
+                                v-model.number="game.score_team_a" 
+                                @change="updateScore(game)"
+                                type="number" 
+                                class="w-12 md:w-16 text-center border-none bg-transparent text-2xl md:text-3xl font-black text-sage-800 focus:ring-0 p-0"
+                                placeholder="0"
+                                >
+                                <span class="text-sage-300 font-light text-xl md:text-2xl">/</span>
+                                <input 
+                                v-model.number="game.score_team_b" 
+                                @change="updateScore(game)"
+                                type="number" 
+                                class="w-12 md:w-16 text-center border-none bg-transparent text-2xl md:text-3xl font-black text-sage-800 focus:ring-0 p-0"
+                                placeholder="0"
+                                >
+                            </div>
 
-                          <!-- Team B -->
-                          <div class="flex-1 flex flex-col items-center md:items-end text-center md:text-right space-y-1">
-                              <div class="font-bold text-sage-900 text-base md:text-lg">{{ game.team_b_player_1.name }}</div>
-                              <div class="font-bold text-sage-900 text-base md:text-lg">{{ game.team_b_player_2.name }}</div>
-                          </div>
-                      </div>
-                  </div>
+                            <!-- Team B -->
+                            <div class="flex-1 flex flex-col items-center md:items-end text-center md:text-right space-y-1">
+                                <div class="font-bold text-sage-900 text-base md:text-lg">{{ game.team_b_player1.name }}</div>
+                                <div class="font-bold text-sage-900 text-base md:text-lg">{{ game.team_b_player2.name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
               </div>
             </div>
             <div v-else class="text-center py-20 text-sage-400">
@@ -140,6 +148,31 @@ const route = useRoute();
 const match = ref(null);
 const activeTab = ref('games');
 const isLoading = ref(false);
+
+const gamesByCourt = computed(() => {
+  if (!currentRound.value || !currentRound.value.games) return {};
+  
+  const groups = {};
+  // Sort games by ID first to ensure stability
+  const sortedGames = [...currentRound.value.games].sort((a, b) => a.id - b.id);
+  
+  sortedGames.forEach(game => {
+      const courtId = game.court_id || 'uncourted';
+      if (!groups[courtId]) {
+          groups[courtId] = [];
+      }
+      groups[courtId].push(game);
+  });
+  
+  return groups;
+});
+
+const getCourtName = (courtId) => {
+    if (courtId === 'uncourted') return 'No Court Assigned';
+    if (!match.value.courts) return `Court ${courtId}`;
+    const court = match.value.courts.find(c => c.id == courtId);
+    return court ? court.name : `Court ${courtId}`;
+};
 
 const currentRound = computed(() => {
   if (!match.value || !match.value.rounds || match.value.rounds.length === 0) return null;

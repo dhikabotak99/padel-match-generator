@@ -10,6 +10,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::prefix('matches')->group(function () {
+    Route::get('/', [MatchController::class, 'index']);
     Route::post('/', [MatchController::class, 'store']);
     Route::get('/{padelMatch}', [MatchController::class, 'show']);
     Route::post('/{padelMatch}/start', [MatchController::class, 'startMatch']);

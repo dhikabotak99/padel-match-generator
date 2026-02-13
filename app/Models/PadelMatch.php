@@ -17,4 +17,9 @@ class PadelMatch extends Model
     {
         return $this->belongsToMany(Player::class, 'padel_match_player');
     }
+
+    public function courts()
+    {
+        return $this->hasMany(Court::class);
+    }
 }

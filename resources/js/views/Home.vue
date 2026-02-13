@@ -8,13 +8,17 @@
             Effortlessly organize your Americano and Mexicano tournaments.
         </p>
         
-        <div class="flex justify-center space-x-6">
-        <router-link to="/create" class="bg-sage-600 hover:bg-sage-700 text-white font-bold py-3 px-8 md:py-4 md:px-10 rounded-full shadow-xl transition transform hover:scale-105 hover:shadow-2xl flex items-center text-sm md:text-base">
-            <span>Create New Match</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-        </router-link>
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
+            <router-link to="/create" class="w-full sm:w-auto bg-sage-600 hover:bg-sage-700 text-gray-800 font-bold py-3 px-8 md:py-4 md:px-10 rounded-full shadow-xl transition transform hover:scale-105 hover:shadow-2xl flex items-center justify-center text-sm md:text-base">
+                <span>Create New Match</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+            </router-link>
+            
+            <router-link to="/matches" class="w-full sm:w-auto bg-white border-2 border-sage-200 hover:border-sage-300 text-sage-800 font-bold py-3 px-8 md:py-4 md:px-10 rounded-full shadow-xl transition transform hover:scale-105 hover:shadow-2xl flex items-center justify-center text-sm md:text-base">
+                <span>View Matches</span>
+            </router-link>
         </div>
     </div>
     

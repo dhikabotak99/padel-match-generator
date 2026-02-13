@@ -15,6 +15,11 @@ class MatchController extends Controller
         $this->gameLogic = $gameLogic;
     }
 
+    public function index()
+    {
+        return response()->json(PadelMatch::withCount('players')->orderBy('created_at', 'desc')->get());
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -23,6 +28,7 @@ class MatchController extends Controller
             'scoring_type' => 'required|in:21,tennis',
             'players' => 'required|array|min:4',
             'players.*' => 'required|string',
+            'courts_count' => 'required|integer|min:1',
         ]);
 
         $match = PadelMatch::create([
@@ -32,6 +38,14 @@ class MatchController extends Controller
             'status' => 'pending',
         ]);
 
+        // Create Courts
+        $courtsCount = $validated['courts_count'];
+        for ($i = 1; $i <= $courtsCount; $i++) {
+            $match->courts()->create([
+                'name' => "Court $i"
+            ]);
+        }
+
         $playerIds = [];
         foreach ($validated['players'] as $playerName) {
             $player = Player::firstOrCreate(['name' => $playerName]);
@@ -40,12 +54,12 @@ class MatchController extends Controller
 
         $match->players()->sync($playerIds);
 
-        return response()->json($match->load('players'), 201);
+        return response()->json($match->load('players', 'courts'), 201);
     }
 
     public function show(PadelMatch $padelMatch)
     {
-        return response()->json($padelMatch->load(['players', 'rounds.games.court', 'rounds.games.teamAPlayer1', 'rounds.games.teamAPlayer2', 'rounds.games.teamBPlayer1', 'rounds.games.teamBPlayer2']));
+        return response()->json($padelMatch->load(['players', 'courts', 'rounds.games.court', 'rounds.games.teamAPlayer1', 'rounds.games.teamAPlayer2', 'rounds.games.teamBPlayer1', 'rounds.games.teamBPlayer2']));
     }
 
     public function startMatch(PadelMatch $padelMatch)

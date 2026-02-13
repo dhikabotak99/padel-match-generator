@@ -42,6 +42,12 @@
                 </div>
              </div>
           </div>
+          
+          <!-- Courts -->
+          <div>
+            <label class="block text-sm font-medium text-sage-700 mb-1">Number of Courts</label>
+            <input v-model.number="form.courts_count" type="number" min="1" class="w-full border-sage-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-sage-500 focus:border-sage-500 transition shadow-sm outline-none" placeholder="1">
+          </div>
 
           <!-- Players -->
           <div>
@@ -55,7 +61,7 @@
           </div>
 
           <!-- Action -->
-          <button @click="createMatch" :disabled="parsedPlayers.length < 4" class="w-full bg-sage-600 hover:bg-sage-700 disabled:bg-sage-300 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 disabled:transform-none disabled:cursor-not-allowed">
+          <button @click="createMatch" :disabled="parsedPlayers.length < 4" class="w-full bg-sage-600 hover:bg-sage-700 disabled:bg-sage-300 text-gray-800 font-bold py-4 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 disabled:transform-none disabled:cursor-not-allowed">
             Create Match
           </button>
         </div>
@@ -74,7 +80,8 @@ const router = useRouter();
 const form = ref({
   name: '',
   type: 'americano',
-  scoring_type: '21'
+  scoring_type: '21',
+  courts_count: 1
 });
 
 const playersInput = ref('');

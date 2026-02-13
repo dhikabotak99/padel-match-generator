@@ -21,10 +21,10 @@
             </div>
             
             <div class="hidden sm:block">
-                 <button v-if="match.status === 'pending'" @click="startMatch" class="bg-sage-600 hover:bg-sage-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transform transition hover:-translate-y-1 hover:shadow-xl">
+                 <button v-if="match.status === 'pending'" @click="startMatch" class="bg-sage-600 hover:bg-sage-700 text-gray-800 font-bold py-3 px-8 rounded-xl shadow-lg transform transition hover:-translate-y-1 hover:shadow-xl">
                     Start Match
                 </button>
-                <button v-else @click="goToMatch" class="bg-sage-600 hover:bg-sage-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition">
+                <button v-else @click="goToMatch" class="bg-sage-600 hover:bg-sage-700 text-gray-800 font-bold py-3 px-8 rounded-xl shadow-lg transition">
                     Go to Match
                 </button>
             </div>
@@ -38,7 +38,7 @@
             
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div v-for="player in match.players" :key="player.id" class="group bg-sage-50 hover:bg-white border border-sage-100 hover:border-sage-300 p-4 rounded-2xl transition duration-200 flex items-center space-x-3">
-                <div class="w-10 h-10 bg-sage-200 text-sage-700 rounded-full flex items-center justify-center text-sm font-bold group-hover:bg-sage-600 group-hover:text-white transition">
+                <div class="w-10 h-10 bg-sage-200 text-sage-700 rounded-full flex items-center justify-center text-sm font-bold group-hover:bg-sage-600 group-hover:text-gray-800 transition">
                 {{ player.name.charAt(0).toUpperCase() }}
                 </div>
                 <span class="font-semibold text-sage-700 group-hover:text-sage-900">{{ player.name }}</span>
@@ -47,18 +47,21 @@
         </div>
 
         <div class="mt-8 sm:hidden">
-             <button v-if="match.status === 'pending'" @click="startMatch" class="w-full bg-sage-600 hover:bg-sage-700 text-white font-bold py-4 rounded-xl shadow-lg">
+             <button v-if="match.status === 'pending'" @click="startMatch" class="w-full bg-sage-600 hover:bg-sage-700 text-gray-800 font-bold py-4 rounded-xl shadow-lg">
                 Start Match
             </button>
-            <button v-else @click="goToMatch" class="w-full bg-sage-600 hover:bg-sage-700 text-white font-bold py-4 rounded-xl shadow-lg">
+            <button v-else @click="goToMatch" class="w-full bg-sage-600 hover:bg-sage-700 text-gray-800 font-bold py-4 rounded-xl shadow-lg">
                 Go to Match
             </button>
         </div>
       </div>
     </div>
     <div v-else class="text-center py-24">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-sage-600 mx-auto mb-4"></div>
-      <p class="text-sage-500 font-medium">Loading match details...</p>
+      <div v-if="error" class="text-red-500 font-bold mb-4">{{ error }}</div>
+      <div v-else>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-sage-600 mx-auto mb-4"></div>
+        <p class="text-sage-500 font-medium">Loading match details...</p>
+      </div>
     </div>
   </div>
 </template>
@@ -71,13 +74,15 @@ import axios from 'axios';
 const route = useRoute();
 const router = useRouter();
 const match = ref(null);
+const error = ref(null);
 
 const fetchMatch = async () => {
   try {
     const response = await axios.get(`/api/matches/${route.params.id}`);
     match.value = response.data;
-  } catch (error) {
-    console.error('Error fetching match:', error);
+  } catch (err) {
+    console.error('Error fetching match:', err);
+    error.value = 'Failed to load match details. Please try again.';
   }
 };
 
@@ -86,8 +91,8 @@ const startMatch = async () => {
     await axios.post(`/api/matches/${match.value.id}/start`);
     match.value.status = 'active'; // Update local state
     goToMatch();
-  } catch (error) {
-    console.error('Error starting match:', error);
+  } catch (err) {
+    console.error('Error starting match:', err);
     alert('Failed to start match');
   }
 };
