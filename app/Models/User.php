@@ -45,4 +45,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function matches()
+    {
+        return $this->hasMany(PadelMatch::class);
+    }
 }

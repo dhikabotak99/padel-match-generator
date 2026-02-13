@@ -17,7 +17,7 @@ class MatchController extends Controller
 
     public function index()
     {
-        return response()->json(PadelMatch::withCount('players')->orderBy('created_at', 'desc')->get());
+        return response()->json(auth()->user()->matches()->withCount('players')->orderBy('created_at', 'desc')->get());
     }
 
     public function store(Request $request)
@@ -31,7 +31,7 @@ class MatchController extends Controller
             'courts_count' => 'required|integer|min:1',
         ]);
 
-        $match = PadelMatch::create([
+        $match = auth()->user()->matches()->create([
             'name' => $validated['name'],
             'type' => $validated['type'],
             'scoring_type' => $validated['scoring_type'],
