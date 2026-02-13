@@ -61,7 +61,7 @@
           </div>
 
           <!-- Action -->
-          <button @click="createMatch" :disabled="parsedPlayers.length < 4" class="w-full bg-sage-600 hover:bg-sage-700 disabled:bg-sage-300 text-gray-800 font-bold py-4 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 disabled:transform-none disabled:cursor-not-allowed">
+          <button @click="createMatch" :disabled="parsedPlayers.length < 4" class="w-full bg-sage-600 hover:bg-sage-700 disabled:bg-sage-300 text-black font-bold py-4 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 disabled:transform-none disabled:cursor-not-allowed">
             Create Match
           </button>
         </div>

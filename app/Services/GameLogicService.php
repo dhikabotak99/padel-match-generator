@@ -45,19 +45,43 @@ class GameLogicService
         // For N=4: Fixed schedule.
         // For N=8: Split into 2 courts, mix.
         
-        $shuffled = $players->shuffle();
+        // Fair rotation logic: Prioritize players who have played fewer games
+        // 1. Get all players with their game count for this match
+        // We shuffle FIRST to ensure that if players have the same game count, 
+        // the order is random (tie-breaking).
+        $playersWithGamesCount = $players->shuffle()->map(function ($player) use ($round) {
+            $gamesPlayed = $round->match->rounds->flatMap->games->filter(function ($game) use ($player) {
+                return $game->team_a_player_1_id == $player->id ||
+                       $game->team_a_player_2_id == $player->id ||
+                       $game->team_b_player_1_id == $player->id ||
+                       $game->team_b_player_2_id == $player->id;
+            })->count();
+            
+            return ['player' => $player, 'count' => $gamesPlayed];
+        })->sortBy('count'); // Ascending: those with fewest games first
+
+        // 2. Select the active players for this round based on capacity
+        $maxGames = $courts->count() > 0 ? $courts->count() : 1;
+        $needed = $maxGames * 4;
+        
+        $activeParticipants = $playersWithGamesCount->take($needed)->pluck('player');
+        
+        // 3. Shuffle ONLY the participants to mix teams, but ensure these specific N players play
+        $shuffled = $activeParticipants->shuffle();
         $chunks = $shuffled->chunk(4);
+        
+        $gamesCreated = 0;
         $courtIndex = 0;
 
         foreach ($chunks as $chunk) {
-            if ($chunk->count() < 4) continue; // Skip if not enough for a game (sit out)
+            if ($chunk->count() < 4) continue; 
+            if ($gamesCreated >= $maxGames) break; // Should not happen if we limited effectively above, but safe guard
 
             $p = $chunk->values();
-            // Create game: (0,1) vs (2,3) - Simplest approach
-            // TODO: Improve to track history and optimize pairings
             
             $court = $courts->count() > 0 ? $courts[$courtIndex % $courts->count()] : null;
             $courtIndex++;
+            $gamesCreated++;
 
             Game::create([
                 'round_id' => $round->id,
@@ -96,10 +120,14 @@ class GameLogicService
         }
 
         $chunks = $sortedPlayers->chunk(4);
+        $maxGames = $courts->count() > 0 ? $courts->count() : 1;
+        $gamesCreated = 0;
         $courtIndex = 0;
 
         foreach ($chunks as $chunk) {
              if ($chunk->count() < 4) continue;
+             if ($gamesCreated >= $maxGames) break;
+
              $p = $chunk->values();
              
              // Mexicano pairing: (1, 4) vs (2, 3)
@@ -107,6 +135,7 @@ class GameLogicService
              
              $court = $courts->count() > 0 ? $courts[$courtIndex % $courts->count()] : null;
              $courtIndex++;
+             $gamesCreated++;
 
             Game::create([
                 'round_id' => $round->id,
