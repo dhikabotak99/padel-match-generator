@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { auth } from './services/auth';
 import Home from './views/Home.vue';
 import MatchSetup from './views/MatchSetup.vue';
 import MatchLobby from './views/MatchLobby.vue';
@@ -58,7 +59,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    const user = localStorage.getItem('user');
+    const user = auth.getUser();
 
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!user) {

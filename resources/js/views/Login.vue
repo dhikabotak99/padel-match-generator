@@ -48,6 +48,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { auth } from '../services/auth';
 
 const router = useRouter();
 const form = ref({
@@ -64,7 +65,10 @@ const handleLogin = async () => {
     try {
         await axios.get('/sanctum/csrf-cookie');
         const response = await axios.post('/api/login', form.value);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // Use auth service to set user with expiry
+        auth.setUser(response.data.user);
+        
         window.location.href = '/matches'; // Force refresh to update Navbar state
     } catch (err) {
         if (err.response && err.response.data && err.response.data.errors) {

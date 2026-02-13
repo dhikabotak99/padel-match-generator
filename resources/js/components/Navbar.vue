@@ -43,10 +43,10 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { auth } from '../services/auth';
 
 const user = computed(() => {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    return auth.getUser();
 });
 
 const router = useRouter();
@@ -57,7 +57,7 @@ const logout = async () => {
     } catch (error) {
         console.error('Logout failed:', error);
     } finally {
-        localStorage.removeItem('user');
+        auth.removeUser();
         window.location.href = '/login'; 
     }
 };
