@@ -42,6 +42,20 @@
                 </div>
              </div>
           </div>
+
+          <!-- Category -->
+          <div>
+            <label class="block text-sm font-medium text-sage-700 mb-1">Category</label>
+             <div class="relative">
+                <select v-model="form.gender_type" class="w-full appearance-none border-sage-200 rounded-xl px-4 py-3 bg-sage-50 focus:ring-2 focus:ring-sage-500 focus:border-sage-500 outline-none cursor-pointer">
+                <option value="open">Open (Any Gender)</option>
+                <option value="mixed">Mixed Doubles (Man + Woman)</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-sage-600">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                </div>
+            </div>
+          </div>
           
           <!-- Courts -->
           <div>
@@ -58,6 +72,39 @@
                     {{ parsedPlayers.length }} Players
                 </div>
             </div>
+          </div>
+
+          <!-- Gender Assignment (Mixed Only) -->
+          <div v-if="form.gender_type === 'mixed' && parsedPlayers.length > 0" class="bg-sage-50 p-4 rounded-xl border border-sage-200">
+             <h4 class="font-bold text-sage-800 mb-2">Assign Genders</h4>
+             <p class="text-sm text-sage-600 mb-4">Please specify gender for each player. (Must have equal number of Men and Women)</p>
+             
+             <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                <div v-for="player in parsedPlayers" :key="player" class="flex items-center justify-between bg-white p-2 rounded-lg border border-sage-100">
+                    <span class="font-medium text-sage-900 truncate mr-2">{{ player }}</span>
+                    <div class="flex space-x-1">
+                        <button 
+                            @click="setGender(player, 'male')"
+                            :class="{'bg-blue-100 text-blue-700 border-blue-300': getGender(player) === 'male', 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100': getGender(player) !== 'male'}"
+                            class="px-3 py-1 rounded-md text-sm font-bold border transition"
+                        >
+                            Man
+                        </button>
+                        <button 
+                            @click="setGender(player, 'female')"
+                            :class="{'bg-pink-100 text-pink-700 border-pink-300': getGender(player) === 'female', 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100': getGender(player) !== 'female'}"
+                            class="px-3 py-1 rounded-md text-sm font-bold border transition"
+                        >
+                            Woman
+                        </button>
+                    </div>
+                </div>
+             </div>
+
+             <div class="mt-3 flex justify-between text-xs font-bold uppercase tracking-wide">
+                 <span :class="{'text-blue-600': maleCount === femaleCount, 'text-red-500': maleCount !== femaleCount}">Men: {{ maleCount }}</span>
+                 <span :class="{'text-pink-600': maleCount === femaleCount, 'text-red-500': maleCount !== femaleCount}">Women: {{ femaleCount }}</span>
+             </div>
           </div>
 
           <!-- Action -->
@@ -80,15 +127,28 @@ const router = useRouter();
 const form = ref({
   name: '',
   type: 'americano',
+  gender_type: 'open',
   scoring_type: '21',
   courts_count: 1
 });
 
 const playersInput = ref('');
+const playerGenders = ref({});
+
+const setGender = (name, gender) => {
+    playerGenders.value[name] = gender;
+};
+
+const getGender = (name) => {
+    return playerGenders.value[name] || 'male'; 
+};
 
 const parsedPlayers = computed(() => {
   return playersInput.value.split('\n').map(p => p.trim()).filter(p => p.length > 0);
 });
+
+const maleCount = computed(() => parsedPlayers.value.filter(p => getGender(p) === 'male').length);
+const femaleCount = computed(() => parsedPlayers.value.filter(p => getGender(p) === 'female').length);
 
 const createMatch = async () => {
   if (parsedPlayers.value.length < 4) {
@@ -96,10 +156,24 @@ const createMatch = async () => {
     return;
   }
 
+  if (form.value.gender_type === 'mixed') {
+      if (maleCount.value !== femaleCount.value) {
+          alert(`Mixed doubles requires equal number of Men and Women.\nCurrent: ${maleCount.value} Men, ${femaleCount.value} Women`);
+          return;
+      }
+  }
+
   try {
+     const finalPlayers = parsedPlayers.value.map(name => {
+        if (form.value.gender_type === 'mixed') {
+            return { name, gender: getGender(name) };
+        }
+        return name;
+    });
+
     const response = await axios.post('/api/matches', {
       ...form.value,
-      players: parsedPlayers.value
+      players: finalPlayers
     });
     
     router.push({ name: 'MatchLobby', params: { id: response.data.id } });

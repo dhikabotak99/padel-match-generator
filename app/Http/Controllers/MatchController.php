@@ -25,15 +25,16 @@ class MatchController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string',
             'type' => 'required|in:americano,mexicano',
+            'gender_type' => 'nullable|in:open,mixed',
             'scoring_type' => 'required|in:21,tennis',
             'players' => 'required|array|min:4',
-            'players.*' => 'required|string',
             'courts_count' => 'required|integer|min:1',
         ]);
 
         $match = auth()->user()->matches()->create([
             'name' => $validated['name'],
             'type' => $validated['type'],
+            'gender_type' => $validated['gender_type'] ?? 'open',
             'scoring_type' => $validated['scoring_type'],
             'status' => 'pending',
         ]);
@@ -47,8 +48,21 @@ class MatchController extends Controller
         }
 
         $playerIds = [];
-        foreach ($validated['players'] as $playerName) {
-            $player = Player::firstOrCreate(['name' => $playerName]);
+        foreach ($validated['players'] as $playerData) {
+            if (is_array($playerData)) {
+                $name = $playerData['name'];
+                $gender = $playerData['gender'] ?? null;
+            } else {
+                $name = $playerData;
+                $gender = null;
+            }
+
+            $player = Player::firstOrCreate(['name' => $name]);
+            
+            if ($gender) {
+                $player->update(['gender' => $gender]);
+            }
+            
             $playerIds[] = $player->id;
         }
 

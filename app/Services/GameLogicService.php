@@ -40,31 +40,19 @@ class GameLogicService
 
     protected function generateAmericanoGames(Round $round, $players, $courts)
     {
-        // Simple random mix for MVP, trying to avoid repeat partners if possible
-        // Ideally: Round Robin logic.
-        // For N=4: Fixed schedule.
-        // For N=8: Split into 2 courts, mix.
-        
-        // Fair rotation logic: Prioritize players who have played fewer games
-        // 1. Get all players with their game count for this match
-        // We shuffle FIRST to ensure that if players have the same game count, 
-        // the order is random (tie-breaking).
-        $playersWithGamesCount = $players->shuffle()->map(function ($player) use ($round) {
-            $gamesPlayed = $round->match->rounds->flatMap->games->filter(function ($game) use ($player) {
-                return $game->team_a_player_1_id == $player->id ||
-                       $game->team_a_player_2_id == $player->id ||
-                       $game->team_b_player_1_id == $player->id ||
-                       $game->team_b_player_2_id == $player->id;
-            })->count();
-            
-            return ['player' => $player, 'count' => $gamesPlayed];
-        })->sortBy('count'); // Ascending: those with fewest games first
+        if ($round->match->gender_type === 'mixed') {
+            $this->generateMixedAmericanoGames($round, $players, $courts);
+            return;
+        }
+
+        // Standard Americano
+        $sortedPlayers = $this->sortPlayersByGameCount($round, $players);
 
         // 2. Select the active players for this round based on capacity
         $maxGames = $courts->count() > 0 ? $courts->count() : 1;
         $needed = $maxGames * 4;
         
-        $activeParticipants = $playersWithGamesCount->take($needed)->pluck('player');
+        $activeParticipants = $sortedPlayers->take($needed);
         
         // 3. Shuffle ONLY the participants to mix teams, but ensure these specific N players play
         $shuffled = $activeParticipants->shuffle();
@@ -75,7 +63,7 @@ class GameLogicService
 
         foreach ($chunks as $chunk) {
             if ($chunk->count() < 4) continue; 
-            if ($gamesCreated >= $maxGames) break; // Should not happen if we limited effectively above, but safe guard
+            if ($gamesCreated >= $maxGames) break; 
 
             $p = $chunk->values();
             
@@ -92,6 +80,68 @@ class GameLogicService
                 'team_b_player_2_id' => $p[3]->id,
             ]);
         }
+    }
+
+    protected function generateMixedAmericanoGames(Round $round, $players, $courts)
+    {
+         // 1. Split players
+         $men = $players->where('gender', 'male');
+         $women = $players->where('gender', 'female');
+
+         // 2. Sort by game count (for each group)
+         $sortedMen = $this->sortPlayersByGameCount($round, $men);
+         $sortedWomen = $this->sortPlayersByGameCount($round, $women);
+
+         // 3. Select participants
+         $maxGames = $courts->count() > 0 ? $courts->count() : 1;
+         
+         // We need 2 men and 2 women per game
+         $menNeeded = $maxGames * 2;
+         $womenNeeded = $maxGames * 2;
+
+         $activeMen = $sortedMen->take($menNeeded);
+         $activeWomen = $sortedWomen->take($womenNeeded);
+
+         $gamesCount = min(floor($activeMen->count() / 2), floor($activeWomen->count() / 2));
+         
+         // 4. Shuffle selected participants for random pairing
+         $shuffledMen = $activeMen->shuffle()->values();
+         $shuffledWomen = $activeWomen->shuffle()->values();
+
+         $courtIndex = 0;
+
+         for ($i = 0; $i < $gamesCount; $i++) {
+             $m1 = $shuffledMen[$i*2];
+             $m2 = $shuffledMen[$i*2 + 1];
+             $w1 = $shuffledWomen[$i*2];
+             $w2 = $shuffledWomen[$i*2 + 1];
+
+             $court = $courts->count() > 0 ? $courts[$courtIndex % $courts->count()] : null;
+             $courtIndex++;
+
+             Game::create([
+                'round_id' => $round->id,
+                'court_id' => $court ? $court->id : null,
+                'team_a_player_1_id' => $m1->id,
+                'team_a_player_2_id' => $w1->id, // M-F pair
+                'team_b_player_1_id' => $m2->id,
+                'team_b_player_2_id' => $w2->id, // M-F pair
+            ]);
+         }
+    }
+
+    protected function sortPlayersByGameCount($round, $players)
+    {
+        return $players->shuffle()->map(function ($player) use ($round) {
+             $gamesPlayed = $round->match->rounds->flatMap->games->filter(function ($game) use ($player) {
+                return $game->team_a_player_1_id == $player->id ||
+                       $game->team_a_player_2_id == $player->id ||
+                       $game->team_b_player_1_id == $player->id ||
+                       $game->team_b_player_2_id == $player->id;
+            })->count();
+            
+            return ['player' => $player, 'count' => $gamesPlayed];
+        })->sortBy('count')->pluck('player');
     }
 
     protected function generateMexicanoGames(Round $round, $players, $courts)

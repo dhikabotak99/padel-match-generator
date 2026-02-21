@@ -1,44 +1,44 @@
 <template>
-  <div class="min-h-screen bg-sky-50 py-8 px-4">
-    <div v-if="match" class="max-w-5xl mx-auto flex flex-col min-h-[80vh] bg-white rounded-3xl shadow-xl overflow-hidden border border-sky-100">
+  <div class="min-h-screen bg-fuchsia-50 py-8 px-4">
+    <div v-if="match" class="max-w-5xl mx-auto flex flex-col min-h-[80vh] bg-white rounded-3xl shadow-xl overflow-hidden border border-fuchsia-100">
       <!-- Header -->
-      <div class="p-6 md:p-8 bg-white border-b border-sky-100 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 relative overflow-hidden">
+      <div class="p-6 md:p-8 bg-white border-b border-fuchsia-100 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 relative overflow-hidden">
         <div class="relative z-10 w-full sm:w-auto text-center sm:text-left">
             <div class="flex items-center justify-center sm:justify-start space-x-3 mb-1">
-                 <h1 class="text-2xl md:text-3xl font-extrabold text-sky-900 tracking-tight">{{ match.name }}</h1>
-                 <span class="bg-sky-100 text-sky-700 text-xs px-2 py-1 rounded-md font-bold uppercase">{{ match.type }}</span>
+                 <h1 class="text-2xl md:text-3xl font-extrabold text-fuchsia-900 tracking-tight">{{ match.name }}</h1>
+                 <span class="bg-fuchsia-100 text-fuchsia-700 text-xs px-2 py-1 rounded-md font-bold uppercase">{{ match.type }}</span>
             </div>
-           <p class="text-sky-500 font-medium">Round <span class="text-sky-700 font-bold">{{ currentRoundNumber }}</span> in progress</p>
+           <p class="text-fuchsia-500 font-medium">Round <span class="text-fuchsia-700 font-bold">{{ currentRoundNumber }}</span> in progress</p>
         </div>
         <div class="relative z-10 w-full sm:w-auto">
-            <button @click="nextRound" :disabled="isLoading" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-gray-800 font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button @click="nextRound" :disabled="isLoading" class="w-full sm:w-auto bg-fuchsia-600 hover:bg-fuchsia-700 text-gray-800 font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed">
             {{ isLoading ? 'Generating...' : 'Next Round' }}
             </button>
         </div>
         
         <!-- Decorative bg -->
-        <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-sky-50 to-transparent pointer-events-none"></div>
+        <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-fuchsia-50 to-transparent pointer-events-none"></div>
       </div>
 
       <!-- Tabs -->
-      <div class="flex border-b border-sky-100 bg-sky-50/50">
+      <div class="flex border-b border-fuchsia-100 bg-fuchsia-50/50">
         <button 
           @click="activeTab = 'games'"
-          :class="{'border-b-2 border-sky-600 text-sky-800 bg-white': activeTab === 'games', 'text-sky-500 hover:text-sky-700 hover:bg-sky-50': activeTab !== 'games'}"
+          :class="{'border-b-2 border-fuchsia-600 text-fuchsia-800 bg-white': activeTab === 'games', 'text-fuchsia-500 hover:text-fuchsia-700 hover:bg-fuchsia-50': activeTab !== 'games'}"
           class="flex-1 py-3 px-4 md:py-4 md:px-6 text-center font-bold text-base md:text-lg focus:outline-none transition-all duration-300"
         >
           Games
         </button>
         <button 
           @click="activeTab = 'leaderboard'"
-          :class="{'border-b-2 border-sky-600 text-sky-800 bg-white': activeTab === 'leaderboard', 'text-sky-500 hover:text-sky-700 hover:bg-sky-50': activeTab !== 'leaderboard'}"
+          :class="{'border-b-2 border-fuchsia-600 text-fuchsia-800 bg-white': activeTab === 'leaderboard', 'text-fuchsia-500 hover:text-fuchsia-700 hover:bg-fuchsia-50': activeTab !== 'leaderboard'}"
           class="flex-1 py-3 px-4 md:py-4 md:px-6 text-center font-bold text-base md:text-lg focus:outline-none transition-all duration-300"
         >
           Leaderboard
         </button>
         <button 
           @click="activeTab = 'history'"
-          :class="{'border-b-2 border-sky-600 text-sky-800 bg-white': activeTab === 'history', 'text-sky-500 hover:text-sky-700 hover:bg-sky-50': activeTab !== 'history'}"
+          :class="{'border-b-2 border-fuchsia-600 text-fuchsia-800 bg-white': activeTab === 'history', 'text-fuchsia-500 hover:text-fuchsia-700 hover:bg-fuchsia-50': activeTab !== 'history'}"
           class="flex-1 py-3 px-4 md:py-4 md:px-6 text-center font-bold text-base md:text-lg focus:outline-none transition-all duration-300"
         >
           History
@@ -52,84 +52,87 @@
           <div v-if="activeTab === 'games'" key="games">
             <div v-if="currentRound" class="space-y-6">
               <div class="flex items-center justify-between mb-2">
-                  <h3 class="text-xl font-bold text-sky-800">Matchups</h3>
-                  <span class="text-sm text-sky-500 italic">Enter scores to auto-save</span>
+                  <h3 class="text-xl font-bold text-fuchsia-800">Matchups</h3>
+                  <span class="text-sm text-fuchsia-500 italic">Enter scores to auto-save</span>
               </div>
               
               <div v-for="(games, courtId) in gamesByCourt" :key="courtId" class="mb-8">
-                <h4 class="text-lg font-bold text-sky-700 mb-3 flex items-center">
-                    <span class="bg-sky-200 text-sky-800 py-1 px-3 rounded-lg mr-2">
+                <h4 class="text-lg font-bold text-fuchsia-700 mb-3 flex items-center">
+                    <span class="bg-fuchsia-200 text-fuchsia-800 py-1 px-3 rounded-lg mr-2">
                         {{ getCourtName(courtId) }}
                     </span>
-                    <span class="text-sm font-normal text-sky-500">{{ games.length }} Game(s)</span>
+                    <span class="text-sm font-normal text-fuchsia-500">{{ games.length }} Game(s)</span>
                 </h4>
                 <div class="grid gap-4 md:gap-6"> 
-                    <div v-for="game in games" :key="game.id" class="bg-sky-50 rounded-2xl p-4 md:p-6 border border-sky-100 hover:border-sky-200 transition shadow-sm hover:shadow-md">
+                    <div v-for="game in games" :key="game.id" class="bg-fuchsia-50 rounded-2xl p-4 md:p-6 border border-fuchsia-100 hover:border-fuchsia-200 transition shadow-sm hover:shadow-md">
                         <div class="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
                             <!-- Team A -->
                             <div class="flex-1 flex flex-col items-center md:items-start text-center md:text-left space-y-1">
-                                <div class="font-bold text-sky-900 text-base md:text-lg">{{ game.team_a_player1.name }}</div>
-                                <div class="font-bold text-sky-900 text-base md:text-lg">{{ game.team_a_player2.name }}</div>
+                                <div class="font-bold text-fuchsia-900 text-base md:text-lg">{{ game.team_a_player1.name }}</div>
+                                <div class="font-bold text-fuchsia-900 text-base md:text-lg">{{ game.team_a_player2.name }}</div>
                             </div>
 
                             <!-- Score Input -->
-                            <div class="flex items-center space-x-4 bg-white px-4 py-2 md:px-6 md:py-3 rounded-xl shadow-inner border border-sky-100">
+                            <div class="flex items-center space-x-4 bg-white px-4 py-2 md:px-6 md:py-3 rounded-xl shadow-inner border border-fuchsia-100">
                                 <input 
                                 v-model.number="game.score_team_a" 
                                 @input="updateScore(game, 'a')"
                                 type="number" 
-                                class="w-12 md:w-16 text-center border-none bg-transparent text-2xl md:text-3xl font-black text-sky-800 focus:ring-0 p-0"
+                                class="w-12 md:w-16 text-center border-none bg-transparent text-2xl md:text-3xl font-black text-fuchsia-800 focus:ring-0 p-0"
                                 placeholder="0"
                                 >
-                                <span class="text-sky-300 font-light text-xl md:text-2xl">/</span>
+                                <span class="text-fuchsia-300 font-light text-xl md:text-2xl">/</span>
                                 <input 
                                 v-model.number="game.score_team_b" 
                                 @input="updateScore(game, 'b')"
                                 type="number" 
-                                class="w-12 md:w-16 text-center border-none bg-transparent text-2xl md:text-3xl font-black text-sky-800 focus:ring-0 p-0"
+                                class="w-12 md:w-16 text-center border-none bg-transparent text-2xl md:text-3xl font-black text-fuchsia-800 focus:ring-0 p-0"
                                 placeholder="0"
                                 >
                             </div>
 
                             <!-- Team B -->
                             <div class="flex-1 flex flex-col items-center md:items-end text-center md:text-right space-y-1">
-                                <div class="font-bold text-sky-900 text-base md:text-lg">{{ game.team_b_player1.name }}</div>
-                                <div class="font-bold text-sky-900 text-base md:text-lg">{{ game.team_b_player2.name }}</div>
+                                <div class="font-bold text-fuchsia-900 text-base md:text-lg">{{ game.team_b_player1.name }}</div>
+                                <div class="font-bold text-fuchsia-900 text-base md:text-lg">{{ game.team_b_player2.name }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
               </div>
             </div>
-            <div v-else class="text-center py-20 text-sky-400">
+            <div v-else class="text-center py-20 text-fuchsia-400">
                <p class="text-xl">No active round.</p>
-               <button @click="nextRound" class="mt-4 text-sky-600 underline hover:text-sky-800">Start Round 1</button>
+               <button @click="nextRound" class="mt-4 text-fuchsia-600 underline hover:text-fuchsia-800">Start Round 1</button>
             </div>
           </div>
           <div v-else-if="activeTab === 'leaderboard'" key="leaderboard">
-            <div class="overflow-x-auto bg-white rounded-2xl border border-sky-100 shadow-sm">
+            <div class="overflow-x-auto bg-white rounded-2xl border border-fuchsia-100 shadow-sm">
               <table class="min-w-full">
                 <thead>
-                  <tr class="bg-sky-50 text-sky-600 uppercase text-xs leading-normal">
+                  <tr class="bg-fuchsia-50 text-fuchsia-600 uppercase text-xs leading-normal">
                     <th class="py-4 px-4 md:px-6 text-left font-bold tracking-wider rounded-tl-2xl">Rank</th>
                     <th class="py-4 px-4 md:px-6 text-left font-bold tracking-wider">Player</th>
                     <th class="py-4 px-4 md:px-6 text-right font-bold tracking-wider">Points</th>
                     <th class="py-4 px-4 md:px-6 text-right font-bold tracking-wider rounded-tr-2xl">Games</th>
                   </tr>
                 </thead>
-                <tbody class="text-sky-700 text-sm">
-                  <tr v-for="(player, index) in leaderboard" :key="player.id" class="border-b border-sky-50 hover:bg-sky-50/50 transition duration-150">
+                <tbody class="text-fuchsia-700 text-sm">
+                  <tr v-for="(player, index) in leaderboard" :key="player.id" class="border-b border-fuchsia-50 hover:bg-fuchsia-50/50 transition duration-150">
                     <td class="py-4 px-4 md:px-6 font-bold whitespace-nowrap">
                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full" :class="{'bg-yellow-100 text-yellow-700': index === 0, 'bg-gray-100 text-gray-700': index > 0}">{{ index + 1 }}</span>
                     </td>
                     <td class="py-4 px-4 md:px-6 font-semibold whitespace-nowrap">
                       {{ player.name }}
+                      <span v-if="match.gender_type === 'mixed'" class="ml-2 text-sm" :class="{'text-blue-600': player.gender === 'male', 'text-pink-600': player.gender === 'female'}">
+                        {{ player.gender === 'male' ? '(M)' : (player.gender === 'female' ? '(W)' : '') }}
+                      </span>
                     </td>
-                    <td class="py-4 px-4 md:px-6 text-right font-black text-lg text-sky-800">
+                    <td class="py-4 px-4 md:px-6 text-right font-black text-lg text-fuchsia-800">
                       {{ player.points }}
                     </td>
                      <td class="py-4 px-4 md:px-6 text-right">
-                      <span class="bg-sky-100 text-sky-600 py-1 px-3 rounded-full text-xs font-bold">{{ player.gamesPlayed }}</span>
+                      <span class="bg-fuchsia-100 text-fuchsia-600 py-1 px-3 rounded-full text-xs font-bold">{{ player.gamesPlayed }}</span>
                     </td>
                   </tr>
                 </tbody>
@@ -138,10 +141,10 @@
           </div>
           <div v-else-if="activeTab === 'history'" key="history">
             <div v-if="pastRounds.length > 0" class="space-y-8">
-              <div v-for="round in pastRounds" :key="round.id" class="bg-white rounded-2xl border border-sky-100 shadow-sm overflow-hidden">
-                <div class="bg-sky-50 px-6 py-4 border-b border-sky-100 flex justify-between items-center">
-                  <h3 class="text-lg font-bold text-sky-800">Round {{ round.round_number }}</h3>
-                  <span class="text-sm text-sky-500">{{ round.games.length }} Games</span>
+              <div v-for="round in pastRounds" :key="round.id" class="bg-white rounded-2xl border border-fuchsia-100 shadow-sm overflow-hidden">
+                <div class="bg-fuchsia-50 px-6 py-4 border-b border-fuchsia-100 flex justify-between items-center">
+                  <h3 class="text-lg font-bold text-fuchsia-800">Round {{ round.round_number }}</h3>
+                  <span class="text-sm text-fuchsia-500">{{ round.games.length }} Games</span>
                 </div>
                 <div class="p-6 grid gap-4 md:grid-cols-2">
                    <div v-for="game in round.games" :key="game.id" class="bg-gray-50 rounded-xl p-4 border border-gray-100 flex justify-between items-center">
@@ -153,9 +156,9 @@
 
                       <!-- Score -->
                       <div class="px-4 flex items-center space-x-2">
-                          <span class="text-2xl font-black text-sky-700">{{ game.score_team_a || 0 }}</span>
+                          <span class="text-2xl font-black text-fuchsia-700">{{ game.score_team_a || 0 }}</span>
                           <span class="text-gray-300 text-xl">/</span>
-                          <span class="text-2xl font-black text-sky-700">{{ game.score_team_b || 0 }}</span>
+                          <span class="text-2xl font-black text-fuchsia-700">{{ game.score_team_b || 0 }}</span>
                       </div>
 
                       <!-- Team B -->
@@ -167,7 +170,7 @@
                 </div>
               </div>
             </div>
-            <div v-else class="text-center py-20 text-sky-400">
+            <div v-else class="text-center py-20 text-fuchsia-400">
                <p class="text-xl">No past rounds yet.</p>
                <p class="text-sm mt-2">Finish a round to see history here.</p>
             </div>
@@ -176,8 +179,8 @@
       </div>
     </div>
     <div v-else class="flex flex-col justify-center items-center min-h-[80vh]">
-      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-sky-600 mb-6"></div>
-       <p class="text-sky-500 font-medium text-lg">Loading match...</p>
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-fuchsia-600 mb-6"></div>
+       <p class="text-fuchsia-500 font-medium text-lg">Loading match...</p>
     </div>
   </div>
 </template>
@@ -238,7 +241,7 @@ const leaderboard = computed(() => {
   
   // Initialize
   match.value.players.forEach(p => {
-    scores[p.id] = { id: p.id, name: p.name, points: 0, gamesPlayed: 0 };
+    scores[p.id] = { id: p.id, name: p.name, gender: p.gender, points: 0, gamesPlayed: 0 };
   });
   
   if (match.value.rounds) {

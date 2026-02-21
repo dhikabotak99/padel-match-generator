@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-sky-50 min-h-screen font-inter">
+  <div class="bg-fuchsia-50 min-h-screen font-inter">
     <Navbar />
     <router-view></router-view>
   </div>
